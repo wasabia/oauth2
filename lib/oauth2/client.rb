@@ -52,6 +52,7 @@ module OAuth2
     def connection
       @connection ||= begin
         conn = Faraday.new(site, options[:connection_opts])
+        conn.response :json, :content_type => /\bjson$/
         conn.build do |b|
           options[:connection_build].call(b)
         end if options[:connection_build]
@@ -137,7 +138,15 @@ module OAuth2
       end
       response = request(options[:token_method], token_url, opts)
       error = Error.new(response)
-      fail(error) if options[:raise_errors] && !(response.parsed.is_a?(Hash) && response.parsed['access_token'])
+
+      result = response.body
+
+      if result.is_a?(String)
+        result = JSON(result)
+      end
+
+      fail(error) if options[:raise_errors] && !(result.is_a?(Hash) && result["access_token"])
+
       access_token_class.from_hash(self, response.parsed.merge(access_token_opts))
     end
 
