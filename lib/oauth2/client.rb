@@ -146,7 +146,7 @@ module OAuth2
 
       fail(error) if options[:raise_errors] && !(result.is_a?(Hash) && result["access_token"])
 
-      access_token_class.from_hash(self, response.parsed.merge(access_token_opts))
+      access_token_class.from_hash(self, result.merge(access_token_opts))
     end
 
     # The Authorization Code strategy
