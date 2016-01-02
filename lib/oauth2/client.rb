@@ -52,7 +52,6 @@ module OAuth2
     def connection
       @connection ||= begin
         conn = Faraday.new(site, options[:connection_opts])
-        conn.response :json, :content_type => /\bjson$/
         conn.build do |b|
           options[:connection_build].call(b)
         end if options[:connection_build]
