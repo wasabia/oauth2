@@ -106,12 +106,12 @@ implementations:
 * Ruby 1.8.7
 * Ruby 1.9.3
 * Ruby 2.0.0
-* Ruby 2.1.0
-* [JRuby][]
-* [Rubinius][]
+* Ruby 2.1
+* Ruby 2.2
+* Ruby 2.3
+* [JRuby 9K][]
 
 [jruby]: http://jruby.org/
-[rubinius]: http://rubini.us/
 
 If something doesn't work on one of these interpreters, it's a bug.
 

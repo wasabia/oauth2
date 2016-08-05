@@ -10,6 +10,7 @@ module OAuth2
       # @param [Hash] a hash of AccessToken property values
       # @return [AccessToken] the initalized AccessToken
       def from_hash(client, hash)
+        hash = hash.dup
         new(client, hash.delete('access_token') || hash.delete(:access_token), hash)
       end
 
@@ -36,9 +37,10 @@ module OAuth2
     # @option opts [String] :header_format ('Bearer %s') the string format to use for the Authorization header
     # @option opts [String] :param_name ('access_token') the parameter name to use for transmission of the
     #    Access Token value in :body or :query transmission mode
-    def initialize(client, token, opts = {})
+    def initialize(client, token, opts = {}) # rubocop:disable Metrics/AbcSize
       @client = client
       @token = token.to_s
+      opts = opts.dup
       [:refresh_token, :expires_in, :expires_at].each do |arg|
         instance_variable_set("@#{arg}", opts.delete(arg) || opts.delete(arg.to_s))
       end
@@ -63,7 +65,7 @@ module OAuth2
     #
     # @return [Boolean]
     def expires?
-      !!@expires_at # rubocop:disable DoubleNegation
+      !!@expires_at
     end
 
     # Whether or not the token is expired
@@ -78,11 +80,11 @@ module OAuth2
     # @return [AccessToken] a new AccessToken
     # @note options should be carried over to the new AccessToken
     def refresh!(params = {})
-      fail('A refresh_token is not available') unless refresh_token
-      params.merge!(:client_id      => @client.id,
-                    :client_secret  => @client.secret,
-                    :grant_type     => 'refresh_token',
-                    :refresh_token  => refresh_token)
+      raise('A refresh_token is not available') unless refresh_token
+      params[:client_id] = @client.id
+      params[:client_secret] = @client.secret
+      params[:grant_type] = 'refresh_token'
+      params[:refresh_token] = refresh_token
       new_token = @client.get_token(params)
       new_token.options = options
       new_token.refresh_token = refresh_token unless new_token.refresh_token
@@ -149,7 +151,7 @@ module OAuth2
 
   private
 
-    def token=(opts) # rubocop:disable MethodLength
+    def token=(opts) # rubocop:disable MethodLength, Metrics/AbcSize
       case options[:mode]
       when :header
         opts[:headers] ||= {}
@@ -166,7 +168,7 @@ module OAuth2
         end
         # @todo support for multi-part (file uploads)
       else
-        fail("invalid :mode option of #{options[:mode]}")
+        raise("invalid :mode option of #{options[:mode]}")
       end
     end
   end
